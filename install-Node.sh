@@ -23,7 +23,7 @@ function install_nodejs_and_npm() {
     fi
 
     # 由于Node.js包中包含npm，所以不需要单独安装npm
-    echo "npm版本：$(node -v)"
+    echo "node版本：$(node -v)"
     echo "npm版本：$(npm -v)"
 }
 
