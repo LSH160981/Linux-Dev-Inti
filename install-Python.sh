@@ -7,6 +7,14 @@ if [ "$(id -u)" != "0" ]; then
     exit 1
 fi
 
+# 检查是否已经安装 Python 3
+function check_python_installed() {
+    if command -v python3 &>/dev/null; then
+        echo "Python 3 已经安装，退出脚本。"
+        exit 0
+    fi
+}
+
 # 安装必要的依赖
 function install_dependencies() {
     echo "安装必要的依赖..."
@@ -14,15 +22,16 @@ function install_dependencies() {
     apt install -y curl wget gcc git
 }
 
-# 安装 Python 3.11 
+# 安装 Python 3
 function install_python() {
-    echo "安装 Python 3.11..."
+    echo "安装 Python 3..."
     add-apt-repository ppa:deadsnakes/ppa -y
-    apt install -y python3.11 python3.11-venv python3.11-dev python3-pip python3-venv 
+    apt install -y python3 python3-venv python3-dev python3-pip python3-venv
 
     echo "验证 Python 版本..."
-    python3.11 --version
+    python3 --version
 }
 
+check_python_installed
 install_dependencies
 install_python
