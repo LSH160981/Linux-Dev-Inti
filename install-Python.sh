@@ -18,7 +18,7 @@ function install_dependencies() {
 function install_python() {
     echo "安装 Python 3.11..."
     add-apt-repository ppa:deadsnakes/ppa -y
-    apt install -y python3.11 python3.11-venv python3.11-dev python3-pip
+    apt install -y python3.11 python3.11-venv python3.11-dev python3-pip python3-venv 
 
     echo "验证 Python 版本..."
     python3.11 --version
