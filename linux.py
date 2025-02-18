@@ -1,6 +1,7 @@
 import os
 import paramiko
 import socket
+import requests
 
 # 生成指定范围内的IP列表
 def ip_list_in_range(start_ip, end_ip):
