@@ -84,7 +84,7 @@ async def main():
     
     # 使用aiohttp来管理HTTP请求
     async with ClientSession() as session:
-        semaphore = asyncio.Semaphore(20)  # 设置并发请求数为10，可以根据需要调整
+        semaphore = asyncio.Semaphore(10)  # 设置并发请求数为10，可以根据需要调整
         
         tasks = []
         for start_ip, end_ip in ip_ranges:
