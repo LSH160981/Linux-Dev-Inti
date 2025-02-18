@@ -7,14 +7,6 @@ if [ "$(id -u)" != "0" ]; then
     exit 1
 fi
 
-# 检查是否已经安装 Python 3
-function check_python_installed() {
-    if command -v python3 &>/dev/null; then
-        echo "Python 3 已经安装，退出脚本。"
-        exit 0
-    fi
-}
-
 # 安装必要的依赖
 function install_dependencies() {
     echo "安装必要的依赖..."
@@ -32,6 +24,5 @@ function install_python() {
     python3 --version
 }
 
-check_python_installed
 install_dependencies
 install_python
